@@ -377,6 +377,7 @@ Reveal.addEventListener( 'customevent', function() {
 		</div>
 
 		<script src="lib/js/head.min.js"></script>
+    <script src="node_modules/socket.io-client/socket.io.js"></script>
 		<script src="js/reveal.js"></script>
 
 		<script>
@@ -398,11 +399,11 @@ Reveal.addEventListener( 'customevent', function() {
 					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
 					{ src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
 					{ src: 'plugin/zoom-js/zoom.js', async: true },
-					{ src: 'plugin/notes/notes.js', async: true }
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/remote-controll-listener/remote-listener.js', async: true }
 				]
 			});
 
 		</script>
-
 	</body>
 </html>
