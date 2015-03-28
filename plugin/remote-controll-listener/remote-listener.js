@@ -32,6 +32,22 @@
     return name.replace(/^#\//, '');
   }
 
+  function getNotes() {
+    var slideElement = Reveal.getCurrentSlide()
+      , notes = '<p> no notes </p>'
+      , notesElement = slideElement.querySelector( 'aside.notes' );
+
+    if(slideElement.hasAttribute('data-notes')) {
+      notes = slideElement.getAttribute('data-notes');
+    }
+
+    if( notesElement ) {
+      notes = notesElement.innerHTML;
+    }
+
+    return notes;
+  }
+
   function getControllsState() {
     var state = {
       buttons: {
@@ -41,7 +57,7 @@
         down: getElState(ctrlDown)
       },
       name: getName(),
-      notes: '<p> no notes </p>'
+      notes: getNotes()
     }
 
     console.log(state);
