@@ -378,7 +378,17 @@ Reveal.addEventListener( 'customevent', function() {
 
 		<script src="lib/js/head.min.js"></script>
     <script src="node_modules/socket.io-client/socket.io.js"></script>
+		<script src="plugin/remote-controll-listener/qrcode.min.js"></script>
 		<script src="js/reveal.js"></script>
+		<style>
+			#qrcode {
+				display: block;
+				position: fixed;
+				top: 10px;
+				left: 10px;
+			}
+		</style>
+		<div id="qrcode"></div>
 
 		<script>
 

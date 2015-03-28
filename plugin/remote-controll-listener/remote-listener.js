@@ -6,12 +6,13 @@
     , socket = io('http://localhost:3005')
     , ENABLE = 'enabled'
     , FRAGMENT = 'fragmented'
+    , QRCode = window.QRCode
     , controls = document.querySelector('.controls')
     , ctrlLeft = controls.querySelector('.navigate-left')
     , ctrlRight = controls.querySelector('.navigate-right')
     , ctrlUp = controls.querySelector('.navigate-up')
+    , id
     , ctrlDown = controls.querySelector('.navigate-down');
-
 
   function getElState(el) {
     var state;
@@ -55,13 +56,31 @@
     }, 0);
   };
 
-  socket.on('connect', function (so) {
+  socket.on('connect', function () {
     console.log('connected!');
+  });
+
+  socket.on('presentation:createID', function(data) {
+    console.log(data.id)
+
+    var qrcode = new QRCode("qrcode", {
+      text: data.link,
+      width: 400,
+      height: 400,
+      colorDark : "#ffffff",
+      colorLight : "#222222",
+      correctLevel : QRCode.CorrectLevel.L
+    });
 
     Reveal.addEventListener( 'slidechanged', send );
     Reveal.addEventListener( 'fragmentshown', send );
     Reveal.addEventListener( 'fragmenthidden', send );
   });
+
+  socket.on('presentation:remoteConnected', function() {
+    console.log('presentation:remoteConnected')
+    document.querySelector('#qrcode').style.display = 'none';
+  })
 
   socket.on('disconnect', function () {
     console.log('disconnected!')
