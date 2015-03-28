@@ -11,7 +11,7 @@
     , ctrlLeft = controls.querySelector('.navigate-left')
     , ctrlRight = controls.querySelector('.navigate-right')
     , ctrlUp = controls.querySelector('.navigate-up')
-    , id
+    , mainPresentation
     , ctrlDown = controls.querySelector('.navigate-down');
 
   function getElState(el) {
@@ -49,7 +49,10 @@
   }
 
   function getControllsState() {
-    var state = {
+    var state
+      , revealState = Reveal.getState();
+
+    state = {
       buttons: {
         left: getElState(ctrlLeft),
         right: getElState(ctrlRight),
@@ -57,10 +60,12 @@
         down: getElState(ctrlDown)
       },
       name: getName(),
-      notes: getNotes()
+      notes: getNotes(),
+      indexh: revealState.indexh,
+      indexv: revealState.indexv,
+      indexf: revealState.indexf
     }
 
-    console.log(state);
     return state;
   }
 
@@ -77,16 +82,16 @@
   });
 
   socket.on('presentation:createID', function(data) {
-    console.log(data.id)
-
     var qrcode = new QRCode("qrcode", {
       text: data.link,
-      width: 400,
-      height: 400,
+      width: 200,
+      height: 200,
       colorDark : "#ffffff",
       colorLight : "#222222",
       correctLevel : QRCode.CorrectLevel.L
     });
+
+    socket.emit('presentation:start', getControllsState());
 
     Reveal.addEventListener( 'slidechanged', send );
     Reveal.addEventListener( 'fragmentshown', send );
@@ -121,6 +126,21 @@
     console.log('presentation:down!', JSON.stringify(data));
     Reveal.down();
   });
+
+  socket.on('presentation:setState', function (data) {
+    console.log('set state', data);
+
+    if (mainPresentation || !Object.keys(data).length) return;
+
+    Reveal.slide(data.indexh, data.indexv, data.indexf);
+  });
+
+  socket.on('remote:slidechanged', function(data) {
+
+    Reveal.slide(data.indexh, data.indexv, data.xf);
+  });
+
+
 
 
 })()
