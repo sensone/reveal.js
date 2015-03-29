@@ -14,6 +14,38 @@
     , mainPresentation
     , ctrlDown = controls.querySelector('.navigate-down');
 
+  var pointer = document.getElementById('pointer');
+
+  function showPointer(left, top, bounds) {
+    var pageW = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+    var pageH = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+
+    pointer.style.left = pageW / bounds.width * left  + 'px';
+    pointer.style.top = pageH / bounds.height * (top - bounds.top) + 'px';
+    pointer.style.display = 'inline-block';
+
+    setTimeout(function() {
+      pointer.style.display = 'none';
+    }, 3000);
+  }
+
+  function zoomTo(left, top, bounds) {
+    var pageW = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+    var pageH = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+    var zoomPadding = 20;
+    var revealScale = Reveal.getScale();
+
+    event.preventDefault();
+
+    zoom.to({
+      x: ( pageW / bounds.width * left * revealScale ) - zoomPadding,
+      y: ( pageH / bounds.height * (top - bounds.top) * revealScale ) - zoomPadding,
+      width: ( bounds.width * revealScale ) + ( zoomPadding * 2 ),
+      height: ( bounds.height * revealScale ) + ( zoomPadding * 2 ),
+      pan: false
+    });
+  }
+
   function getElState(el) {
     var state;
 
@@ -120,6 +152,18 @@
   socket.on('presentation:up', function (data) {
     console.log('presentation:up!', JSON.stringify(data));
     Reveal.up();
+  });
+
+  socket.on('presentation:pointer', function (data) {
+    console.log('presentation:pointer!', JSON.stringify(data));
+
+    showPointer(data.x, data.y, data.bounds);
+  });
+
+  socket.on('presentation:zoom', function (data) {
+    console.log('presentation:zoom!', JSON.stringify(data));
+
+    zoomTo(data.x, data.y, data.bounds);
   });
 
   socket.on('presentation:down', function (data) {
