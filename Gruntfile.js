@@ -1,6 +1,28 @@
 /* global module:false */
 module.exports = function(grunt) {
-	var port = grunt.option('port') || 8001;
+	var port = grunt.option('port') || 8000;
+
+  function getMashineIp() {
+	  var os = require('os'),
+        ifaces = os.networkInterfaces(),
+        lookupIpAddress = 'localhost';
+
+	  for (var dev in ifaces) {
+	    if (dev !== 'en1' && dev !== 'en0') {
+	      continue;
+	    }
+
+	    ifaces[dev].forEach(function(details) {
+	      if (details.family === 'IPv4') {
+	        lookupIpAddress = details.address;
+	        return lookupIpAddress;
+	      }
+	    });
+	  }
+
+	  return lookupIpAddress;
+  }
+
 	// Project configuration
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),
@@ -96,8 +118,9 @@ module.exports = function(grunt) {
 				options: {
 					port: port,
 					base: '.',
-                    livereload: true,
-                    open: true
+          livereload: true,
+          open: true,
+          hostname: getMashineIp()
 				}
 			}
 		},
