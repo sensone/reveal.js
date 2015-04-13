@@ -137,9 +137,9 @@ module.exports = function(grunt) {
     },
 
     watch: {
-            options: {
-                livereload: true
-            },
+      options: {
+        livereload: true
+      },
       js: {
         files: [ 'Gruntfile.js', 'js/reveal.js' ],
         tasks: 'js'
@@ -152,9 +152,9 @@ module.exports = function(grunt) {
         files: [ 'css/reveal.scss' ],
         tasks: 'css-core'
       },
-            html: {
-                files: [ 'index.html']
-            }
+      html: {
+        files: [ 'index.html']
+      }
     }
 
   });
