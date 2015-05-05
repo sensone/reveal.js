@@ -12,6 +12,9 @@
     , ctrlRight = controls.querySelector('.navigate-right')
     , ctrlUp = controls.querySelector('.navigate-up')
     , mainPresentation
+    , token
+    , storage = window.localStorage
+    , presentation_id = Reveal.getConfig().presentation_id
     , ctrlDown = controls.querySelector('.navigate-down');
 
   var pointer = document.getElementById('pointer');
@@ -80,6 +83,14 @@
     return notes;
   }
 
+  function getSecretKey() {
+    return storage.getItem('riveal_secret_key');
+  }
+
+  function setSecretKey(key) {
+    storage.setItem('riveal_secret_key', key);
+  }
+
   function getControllsState() {
     var state
       , revealState = Reveal.getState();
@@ -103,19 +114,35 @@
 
   function send() {
     setTimeout(function() {
-      var state = getControllsState();
+      var data = {
+          presentation_id: presentation_id,
+          state: getControllsState(),
+          token: token
+        };
 
-      socket.emit('presentation:slidechanged', state);
+      socket.emit('presentation:slidechanged', data);
     }, 0);
   };
 
   socket.on('connect', function () {
     console.log('connected!');
+    console.log(presentation_id)
+    if (!presentation_id) {
+      console.log('you don\'t set secret key in reveal config');
+    } else {
+      console.log(getControllsState())
+      socket.emit('presentation:init', {
+        presentation_id: presentation_id,
+        state: getControllsState()
+      });
+    }
   });
 
-  socket.on('presentation:createID', function(data) {
+  socket.on('server:init', function(data) {
+    token = data.token;
+
     var qrcode = new QRCode("qrcode", {
-      text: data.link,
+      text: 'http://localhost:3006/' + presentation_id + '/'+ token,
       width: 200,
       height: 200,
       colorDark : "#ffffff",
@@ -123,15 +150,15 @@
       correctLevel : QRCode.CorrectLevel.L
     });
 
-    socket.emit('presentation:start', getControllsState());
+    //socket.emit('presentation:start', getControllsState());
 
     Reveal.addEventListener( 'slidechanged', send );
     Reveal.addEventListener( 'fragmentshown', send );
     Reveal.addEventListener( 'fragmenthidden', send );
   });
 
-  socket.on('presentation:remoteConnected', function() {
-    console.log('presentation:remoteConnected')
+  socket.on('remote:remoteConnected', function() {
+    console.log('remote:remoteConnected')
     document.querySelector('#qrcode').style.display = 'none';
   })
 
@@ -139,39 +166,39 @@
     console.log('disconnected!')
   });
 
-  socket.on('presentation:left', function (data) {
-    console.log('presentation:left!', JSON.stringify(data));
+  socket.on('remote:left', function (data) {
+    console.log('remote:left!', JSON.stringify(data));
     Reveal.left();
   });
 
-  socket.on('presentation:right', function (data) {
-    console.log('presentation:right!', JSON.stringify(data));
+  socket.on('remote:right', function (data) {
+    console.log('remote:right!', JSON.stringify(data));
     Reveal.right();
   });
 
-  socket.on('presentation:up', function (data) {
-    console.log('presentation:up!', JSON.stringify(data));
+  socket.on('remote:up', function (data) {
+    console.log('remote:up!', JSON.stringify(data));
     Reveal.up();
   });
 
-  socket.on('presentation:pointer', function (data) {
-    console.log('presentation:pointer!', JSON.stringify(data));
+  socket.on('remote:pointer', function (data) {
+    console.log('remote:pointer!', JSON.stringify(data));
 
     showPointer(data.x, data.y, data.bounds);
   });
 
-  socket.on('presentation:zoom', function (data) {
-    console.log('presentation:zoom!', JSON.stringify(data));
+  socket.on('remote:zoom', function (data) {
+    console.log('remote:zoom!', JSON.stringify(data));
 
     zoomTo(data.x, data.y, data.bounds);
   });
 
-  socket.on('presentation:down', function (data) {
-    console.log('presentation:down!', JSON.stringify(data));
+  socket.on('remote:down', function (data) {
+    console.log('remote:down!', JSON.stringify(data));
     Reveal.down();
   });
 
-  socket.on('presentation:setState', function (data) {
+  socket.on('remote:setState', function (data) {
     console.log('set state', data);
 
     if (mainPresentation || !Object.keys(data).length) return;
@@ -179,7 +206,7 @@
     Reveal.slide(data.indexh, data.indexv, data.indexf);
   });
 
-  socket.on('remote:slidechanged', function(data) {
+  socket.on('presentation:slidechanged', function(data) {
 
     Reveal.slide(data.indexh, data.indexv, data.xf);
   });
