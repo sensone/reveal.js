@@ -83,12 +83,12 @@
     return notes;
   }
 
-  function getSecretKey() {
+  function getToken() {
     return storage.getItem('riveal_secret_key');
   }
 
-  function setSecretKey(key) {
-    storage.setItem('riveal_secret_key', key);
+  function setToken(token) {
+    storage.setItem('riveal_secret_key', token);
   }
 
   function getControllsState() {
@@ -133,16 +133,20 @@
       console.log(getControllsState())
       socket.emit('presentation:init', {
         presentation_id: presentation_id,
-        state: getControllsState()
+        state: getControllsState(),
+        token: getToken()
       });
     }
   });
 
   socket.on('server:init', function(data) {
+    var qrSelector = 'qrcode';
     token = data.token;
+    setToken(token);
+    document.getElementById(qrSelector).innerHTML = '';
 
-    var qrcode = new QRCode("qrcode", {
-      text: 'http://localhost:3006/' + presentation_id + '/'+ token,
+    new QRCode(qrSelector, {
+      text: 'http://10.6.165.235:3006/#/' + presentation_id + '/'+ token,
       width: 200,
       height: 200,
       colorDark : "#ffffff",
