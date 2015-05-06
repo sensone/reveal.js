@@ -19,33 +19,29 @@
     , pointer = document.getElementById('pointer')
     , ctrlDown = controls.querySelector('.navigate-down');
 
-  function showPointer(left, top, bounds) {
-    var pageW = Math.max(document.documentElement.clientWidth, window.innerWidth || 0)
-      , pageH = Math.max(document.documentElement.clientHeight, window.innerHeight || 0)
-      , pointerStyle = pointer.style;
+  function showPointer(left, top) {
+    var pointerStyle = pointer.style;
 
-    pointerStyle.left = pageW / bounds.width * left  + 'px';
-    pointerStyle.top = pageH / bounds.height * (top - bounds.top) + 'px';
+    pointerStyle.left = left + 'px';
+    pointerStyle.top = top + 'px';
     pointerStyle.display = 'inline-block';
 
     setTimeout(function() {
-      pointerStyle = 'none';
+      pointerStyle.display = 'none';
     }, 3000);
   }
 
-  function zoomTo(left, top, bounds) {
-    var pageW = Math.max(document.documentElement.clientWidth, window.innerWidth || 0)
-      , pageH = Math.max(document.documentElement.clientHeight, window.innerHeight || 0)
-      , zoomPadding = 20
+  function zoomTo(left, top) {
+    var zoomPadding = 20
       , revealScale = Reveal.getScale();
 
     event.preventDefault();
 
     zoom.to({
-      x: ( pageW / bounds.width * left * revealScale ) - zoomPadding,
-      y: ( pageH / bounds.height * (top - bounds.top) * revealScale ) - zoomPadding,
-      width: ( bounds.width * revealScale ) + ( zoomPadding * 2 ),
-      height: ( bounds.height * revealScale ) + ( zoomPadding * 2 ),
+      x: left * revealScale - zoomPadding * 10,
+      y: top * revealScale - zoomPadding * 10,
+      width: revealScale + zoomPadding * 20,
+      height: revealScale + zoomPadding * 20,
       pan: false
     });
   }
@@ -85,11 +81,11 @@
   }
 
   function getToken() {
-    return storage.getItem('riveal_secret_key');
+    return storage.getItem(presentation_id);
   }
 
   function setToken(token) {
-    storage.setItem('riveal_secret_key', token);
+    storage.setItem(presentation_id, token);
   }
 
   function getControllsState() {
@@ -138,7 +134,7 @@
       var data = {
         presentation_id: presentation_id,
         state: getControllsState(),
-        token: token
+        token: getToken()
       };
 
       html2canvas(document.getElementsByTagName('body'), {
@@ -200,13 +196,13 @@
   socket.on('remote:pointer', function (data) {
     console.log('remote:pointer!', JSON.stringify(data));
 
-    showPointer(data.x, data.y, data.bounds);
+    showPointer(data.x, data.y);
   });
 
   socket.on('remote:zoom', function (data) {
     console.log('remote:zoom!', JSON.stringify(data));
 
-    zoomTo(data.x, data.y, data.bounds);
+    zoomTo(data.x, data.y);
   });
 
   socket.on('remote:down', function (data) {
