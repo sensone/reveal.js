@@ -7,6 +7,7 @@
     , ENABLE = 'enabled'
     , FRAGMENT = 'fragmented'
     , QRCode = window.QRCode
+    , html2canvas = window.html2canvas
     , controls = document.querySelector('.controls')
     , ctrlLeft = controls.querySelector('.navigate-left')
     , ctrlRight = controls.querySelector('.navigate-right')
@@ -15,28 +16,28 @@
     , token
     , storage = window.localStorage
     , presentation_id = Reveal.getConfig().presentation_id
+    , pointer = document.getElementById('pointer')
     , ctrlDown = controls.querySelector('.navigate-down');
 
-  var pointer = document.getElementById('pointer');
-
   function showPointer(left, top, bounds) {
-    var pageW = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
-    var pageH = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+    var pageW = Math.max(document.documentElement.clientWidth, window.innerWidth || 0)
+      , pageH = Math.max(document.documentElement.clientHeight, window.innerHeight || 0)
+      , pointerStyle = pointer.style;
 
-    pointer.style.left = pageW / bounds.width * left  + 'px';
-    pointer.style.top = pageH / bounds.height * (top - bounds.top) + 'px';
-    pointer.style.display = 'inline-block';
+    pointerStyle.left = pageW / bounds.width * left  + 'px';
+    pointerStyle.top = pageH / bounds.height * (top - bounds.top) + 'px';
+    pointerStyle.display = 'inline-block';
 
     setTimeout(function() {
-      pointer.style.display = 'none';
+      pointerStyle = 'none';
     }, 3000);
   }
 
   function zoomTo(left, top, bounds) {
-    var pageW = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
-    var pageH = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
-    var zoomPadding = 20;
-    var revealScale = Reveal.getScale();
+    var pageW = Math.max(document.documentElement.clientWidth, window.innerWidth || 0)
+      , pageH = Math.max(document.documentElement.clientHeight, window.innerHeight || 0)
+      , zoomPadding = 20
+      , revealScale = Reveal.getScale();
 
     event.preventDefault();
 
@@ -113,15 +114,19 @@
   }
 
   function send() {
-    setTimeout(function() {
-      var data = {
-          presentation_id: presentation_id,
-          state: getControllsState(),
-          token: token
-        };
+    var data = {
+      presentation_id: presentation_id,
+      state: getControllsState(),
+      token: token
+    };
 
-      socket.emit('presentation:slidechanged', data);
-    }, 0);
+    html2canvas(document.getElementsByTagName('body'), {
+      onrendered: function(canvas) {
+        data.state.screenshot = canvas.toDataURL();
+        console.log('presentation:slidechanged', data)
+        socket.emit('presentation:slidechanged', data);
+      }
+    });
   };
 
   socket.on('connect', function () {
@@ -130,11 +135,18 @@
     if (!presentation_id) {
       console.log('you don\'t set secret key in reveal config');
     } else {
-      console.log(getControllsState())
-      socket.emit('presentation:init', {
+      var data = {
         presentation_id: presentation_id,
         state: getControllsState(),
-        token: getToken()
+        token: token
+      };
+
+      html2canvas(document.getElementsByTagName('body'), {
+        onrendered: function(canvas) {
+          data.state.screenshot = canvas.toDataURL();
+          console.log(data)
+          socket.emit('presentation:init', data);
+        }
       });
     }
   });
