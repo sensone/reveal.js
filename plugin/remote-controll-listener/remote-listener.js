@@ -162,6 +162,11 @@
       correctLevel : QRCode.CorrectLevel.L
     });
 
+    socket.emit('presentation:checkClient', {
+      presentation_id: presentation_id,
+      token: token
+    });
+
     //socket.emit('presentation:start', getControllsState());
 
     Reveal.addEventListener( 'slidechanged', send );
