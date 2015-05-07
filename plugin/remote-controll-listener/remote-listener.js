@@ -46,6 +46,14 @@
     });
   }
 
+  function verifySession(data) {
+    if (data.presentation_id === presentation_id && data.token === token) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   function getElState(el) {
     var state;
 
@@ -127,7 +135,7 @@
 
   socket.on('connect', function () {
     console.log('connected!');
-    console.log(presentation_id)
+
     if (!presentation_id) {
       console.log('you don\'t set secret key in reveal config');
     } else {
@@ -140,7 +148,6 @@
       html2canvas(document.getElementsByTagName('body'), {
         onrendered: function(canvas) {
           data.state.screenshot = canvas.toDataURL();
-          console.log(data)
           socket.emit('presentation:init', data);
         }
       });
@@ -174,9 +181,11 @@
     Reveal.addEventListener( 'fragmenthidden', send );
   });
 
-  socket.on('remote:remoteConnected', function() {
-    console.log('remote:remoteConnected')
-    document.querySelector('#qrcode').style.display = 'none';
+  socket.on('remote:remoteConnected', function(data) {
+    if (verifySession(data)) {
+      console.log('remote:remoteConnected')
+      document.querySelector('#qrcode').style.display = 'none';
+    }
   })
 
   socket.on('disconnect', function () {
@@ -184,51 +193,56 @@
   });
 
   socket.on('remote:left', function (data) {
-    console.log('remote:left!', JSON.stringify(data));
-    Reveal.left();
+    if (verifySession(data)) {
+      console.log('remote:left!', JSON.stringify(data));
+      Reveal.left();
+    }
   });
 
   socket.on('remote:right', function (data) {
-    console.log('remote:right!', JSON.stringify(data));
-    Reveal.right();
+    if (verifySession(data)) {
+      console.log('remote:right!', JSON.stringify(data));
+      Reveal.right();
+    }
   });
 
   socket.on('remote:up', function (data) {
-    console.log('remote:up!', JSON.stringify(data));
-    Reveal.up();
+    if (verifySession(data)) {
+      console.log('remote:up!', JSON.stringify(data));
+      Reveal.up();
+    }
   });
 
   socket.on('remote:pointer', function (data) {
-    console.log('remote:pointer!', JSON.stringify(data));
+    if (verifySession(data)) {
+      console.log('remote:pointer!', JSON.stringify(data));
 
-    showPointer(data.x, data.y);
+      showPointer(data.x, data.y);
+    }
   });
 
   socket.on('remote:zoom', function (data) {
-    console.log('remote:zoom!', JSON.stringify(data));
+    if (verifySession(data)) {
+      console.log('remote:zoom!', JSON.stringify(data));
 
-    zoomTo(data.x, data.y);
+      zoomTo(data.x, data.y);
+    }
   });
 
   socket.on('remote:down', function (data) {
-    console.log('remote:down!', JSON.stringify(data));
-    Reveal.down();
+    if (verifySession(data)) {
+      console.log('remote:down!', JSON.stringify(data));
+      Reveal.down();
+    }
   });
 
   socket.on('remote:setState', function (data) {
     console.log('set state', data);
 
-    if (mainPresentation || !Object.keys(data).length) return;
-
-    Reveal.slide(data.indexh, data.indexv, data.indexf);
+    if (!Object.keys(data).length) return;
+    if (verifySession(data)) {
+      Reveal.slide(data.indexh, data.indexv, data.indexf);
+    }
   });
 
-  socket.on('presentation:slidechanged', function(data) {
-
-    Reveal.slide(data.indexh, data.indexv, data.xf);
-  });
-
-
-
-
-})()
+})();
