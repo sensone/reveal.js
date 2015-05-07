@@ -5,7 +5,7 @@
   "homepage": "http://lab.hakim.se/reveal-js",
   "subdomain": "revealjs",
   "scripts": {
-    "postinstall": "echo postinstall time; ./node_modules/grunt-cli/bin/grunt serve"
+    "postinstall": "grunt serve"
   },
   "author": {
     "name": "Hakim El Hattab",
