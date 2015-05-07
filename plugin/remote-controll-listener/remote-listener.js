@@ -174,8 +174,6 @@
       token: token
     });
 
-    //socket.emit('presentation:start', getControllsState());
-
     Reveal.addEventListener( 'slidechanged', send );
     Reveal.addEventListener( 'fragmentshown', send );
     Reveal.addEventListener( 'fragmenthidden', send );
@@ -237,8 +235,6 @@
   });
 
   socket.on('remote:setState', function (data) {
-    console.log('set state', data);
-
     if (!Object.keys(data).length) return;
     if (verifySession(data)) {
       Reveal.slide(data.indexh, data.indexv, data.indexf);
