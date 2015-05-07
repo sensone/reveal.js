@@ -1,27 +1,6 @@
 /* global module:false */
 module.exports = function(grunt) {
-  var port = grunt.option('port') || 5000;
-
-  function getMashineIp() {
-    var os = require('os'),
-        ifaces = os.networkInterfaces(),
-        lookupIpAddress = 'localhost';
-
-    for (var dev in ifaces) {
-      if (dev !== 'en1' && dev !== 'en0') {
-        continue;
-      }
-
-      ifaces[dev].forEach(function(details) {
-        if (details.family === 'IPv4') {
-          lookupIpAddress = details.address;
-          return lookupIpAddress;
-        }
-      });
-    }
-
-    return lookupIpAddress;
-  }
+  var port = grunt.option('port') || process.env.PORT || 5000;
 
   // Project configuration
   grunt.initConfig({
