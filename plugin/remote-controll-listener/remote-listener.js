@@ -3,7 +3,7 @@
 
   var Reveal = window.Reveal
     , io = window.io
-    , socket = io('http://localhost:3005')
+    , socket = io('https://warm-coast-3384.herokuapp.com/')
     , ENABLE = 'enabled'
     , FRAGMENT = 'fragmented'
     , QRCode = window.QRCode
@@ -154,7 +154,7 @@
     document.getElementById(qrSelector).innerHTML = '';
 
     new QRCode(qrSelector, {
-      text: 'http://10.6.165.217:3006/#/' + presentation_id + '/'+ token,
+      text: 'https://hidden-brushlands-5758.herokuapp.com/#/' + presentation_id + '/'+ token,
       width: 200,
       height: 200,
       colorDark : "#ffffff",
