@@ -154,7 +154,7 @@
     document.getElementById(qrSelector).innerHTML = '';
 
     new QRCode(qrSelector, {
-      text: 'http://10.6.165.235:3006/#/' + presentation_id + '/'+ token,
+      text: 'http://10.6.165.217:3006/#/' + presentation_id + '/'+ token,
       width: 200,
       height: 200,
       colorDark : "#ffffff",
