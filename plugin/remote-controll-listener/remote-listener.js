@@ -17,7 +17,8 @@
     , storage = window.localStorage
     , presentation_id = Reveal.getConfig().presentation_id
     , pointer = document.getElementById('pointer')
-    , ctrlDown = controls.querySelector('.navigate-down');
+    , ctrlDown = controls.querySelector('.navigate-down')
+    , pointerTimeoutId;
 
   function showPointer(left, top) {
     var pointerStyle = pointer.style;
@@ -26,9 +27,13 @@
     pointerStyle.top = top + 'px';
     pointerStyle.display = 'inline-block';
 
-    setTimeout(function() {
+   if (pointerTimeoutId) {
+     clearTimeout(pointerTimeoutId);
+   }
+
+   pointerTimeoutId = setTimeout(function() {
       pointerStyle.display = 'none';
-    }, 3000);
+    }, 2000);
   }
 
   function zoomTo(left, top) {
