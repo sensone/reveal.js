@@ -129,6 +129,8 @@
       token: token
     };
 
+    console.log(data)
+
     html2canvas(document.getElementsByTagName('body'), {
       onrendered: function(canvas) {
         data.state.screenshot = canvas.toDataURL();
@@ -153,6 +155,7 @@
       html2canvas(document.getElementsByTagName('body'), {
         onrendered: function(canvas) {
           data.state.screenshot = canvas.toDataURL();
+          console.log(data)
           socket.emit('presentation:init', data);
         }
       });
