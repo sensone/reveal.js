@@ -1,0 +1,40 @@
+h1,h2,h3,h4,h5,h5 {
+  color: yellow !important;
+}
+
+img {
+  margin: 0 !important;
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+pre {
+  margin: 0 auto !important;
+}
+
+code {
+  padding: 0 !important;
+}
+
+ul {
+  float: left !important;
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0!important;
+}
+
+li {
+    padding-left: 1em !important;
+    font-size: 70px !important;
+}
+
+li:before {
+    content: "✓ " !important;
+    color: green; /* or whatever color you prefer */
+}
+
+.image__right {
+  float: right;
+  border: none;
+}
