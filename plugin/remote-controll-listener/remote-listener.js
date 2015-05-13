@@ -3,7 +3,7 @@
 
   var Reveal = window.Reveal
     , io = window.io
-    , socket = io('https://warm-coast-3384.herokuapp.com/')
+    , socket = io('http://10.6.166.19:3005')
     , ENABLE = 'enabled'
     , FRAGMENT = 'fragmented'
     , QRCode = window.QRCode
@@ -49,14 +49,6 @@
       height: revealScale + zoomPadding * 20,
       pan: false
     });
-  }
-
-  function verifySession(data) {
-    if (data.presentation_id === presentation_id && data.token === token) {
-      return true;
-    } else {
-      return false;
-    }
   }
 
   function getElState(el) {
@@ -123,17 +115,11 @@
   }
 
   function send() {
-    var data = {
-      presentation_id: presentation_id,
-      state: getControllsState(),
-      token: token
-    };
-
-    console.log(data)
+    var data = getControllsState();
 
     html2canvas(document.getElementsByTagName('body'), {
       onrendered: function(canvas) {
-        data.state.screenshot = canvas.toDataURL();
+        data.screenshot = canvas.toDataURL();
         console.log('presentation:slidechanged', data)
         socket.emit('presentation:slidechanged', data);
       }
@@ -146,17 +132,13 @@
     if (!presentation_id) {
       console.log('you don\'t set secret key in reveal config');
     } else {
-      var data = {
-        presentation_id: presentation_id,
-        state: getControllsState(),
-        token: getToken()
-      };
+      var data = getControllsState();
 
       html2canvas(document.getElementsByTagName('body'), {
         onrendered: function(canvas) {
-          data.state.screenshot = canvas.toDataURL();
+          data.screenshot = canvas.toDataURL();
           console.log(data)
-          socket.emit('presentation:init', data);
+          socket.emit('presentation:init', data, presentation_id, getToken());
         }
       });
     }
@@ -169,7 +151,7 @@
     document.getElementById(qrSelector).innerHTML = '';
 
     new QRCode(qrSelector, {
-      text: 'https://hidden-brushlands-5758.herokuapp.com/#/' + presentation_id + '/'+ token,
+      text: 'http://10.6.166.19:3006/#/' + presentation_id + '/'+ token,
       width: 200,
       height: 200,
       colorDark : "#ffffff",
@@ -177,76 +159,49 @@
       correctLevel : QRCode.CorrectLevel.L
     });
 
-    socket.emit('presentation:checkClient', {
-      presentation_id: presentation_id,
-      token: token
-    });
-
     Reveal.addEventListener( 'slidechanged', send );
     Reveal.addEventListener( 'fragmentshown', send );
     Reveal.addEventListener( 'fragmenthidden', send );
   });
 
-  socket.on('remote:remoteConnected', function(data) {
-    if (verifySession(data)) {
-      console.log('remote:remoteConnected')
-      document.querySelector('#qrcode').style.display = 'none';
-    }
-  })
-
   socket.on('disconnect', function () {
-    console.log('disconnected!')
+    console.log('disconnected!');
   });
 
-  socket.on('remote:left', function (data) {
-    if (verifySession(data)) {
-      console.log('remote:left!', JSON.stringify(data));
-      Reveal.left();
-    }
+  socket.on('remote:remoteConnected', function() {
+    console.log('remote:remoteConnected')
+    document.querySelector('#qrcode').style.display = 'none';
   });
 
-  socket.on('remote:right', function (data) {
-    if (verifySession(data)) {
-      console.log('remote:right!', JSON.stringify(data));
-      Reveal.right();
-    }
+  socket.on('remote:left', function () {
+    console.log('remote:left!');
+    Reveal.left();
   });
 
-  socket.on('remote:up', function (data) {
-    if (verifySession(data)) {
-      console.log('remote:up!', JSON.stringify(data));
-      Reveal.up();
-    }
+  socket.on('remote:right', function () {
+    console.log('remote:right!');
+    Reveal.right();
+  });
+
+  socket.on('remote:up', function () {
+    console.log('remote:up!');
+    Reveal.up();
   });
 
   socket.on('remote:pointer', function (data) {
-    if (verifySession(data)) {
-      console.log('remote:pointer!', JSON.stringify(data));
-
-      showPointer(data.x, data.y);
-    }
+    console.log('remote:pointer!', JSON.stringify(data));
+    showPointer(data.x, data.y);
   });
 
   socket.on('remote:zoom', function (data) {
-    if (verifySession(data)) {
-      console.log('remote:zoom!', JSON.stringify(data));
-
-      zoomTo(data.x, data.y);
-    }
+    console.log('remote:zoom!', JSON.stringify(data));
+    zoomTo(data.x, data.y);
   });
 
-  socket.on('remote:down', function (data) {
-    if (verifySession(data)) {
-      console.log('remote:down!', JSON.stringify(data));
-      Reveal.down();
-    }
+  socket.on('remote:down', function () {
+    console.log('remote:down!');
+    Reveal.down();
   });
 
-  socket.on('remote:setState', function (data) {
-    if (!Object.keys(data).length) return;
-    if (verifySession(data)) {
-      Reveal.slide(data.indexh, data.indexv, data.indexf);
-    }
-  });
 
 })();
